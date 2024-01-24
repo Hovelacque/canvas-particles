@@ -134,6 +134,16 @@
         }
     }
 
+    function mousemove(e){
+        mouse.x = e.x;
+        mouse.y = e.y;
+    }
+
+    function mouseout(e){
+        mouse.x = undefined;
+        mouse.y = undefined;
+    }
+
     function start() {
         resizeReset();
         animate();
@@ -141,14 +151,10 @@
 
     start();
     window.addEventListener("resize", resizeReset);
-    window.addEventListener("mousemove", (e) => {
-        mouse.x = e.x;
-        mouse.y = e.y;
-    })
-    window.addEventListener("mouseout", (e) => {
-        mouse.x = undefined;
-        mouse.y = undefined;
-    })
+    window.addEventListener("mousemove", mousemove)
+    window.addEventListener("touchmove", mousemove);
+    window.addEventListener("mouseout", mouseout);
+    window.addEventListener("touchend", mouseout);
     document.querySelector('.connectParticles').addEventListener('click', () => {
         connectParticles = !connectParticles;
         document.querySelector('#connectParticles').checked = connectParticles
