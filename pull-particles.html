@@ -1,0 +1,170 @@
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #222;
+    }
+
+    canvas {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .menu {
+        position: relative;
+        top: 10;
+        left: 10;
+        width: 250px;
+        background-image: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+    }
+
+    .item-menu {
+        color: white;
+        font-size: 20px;
+    }
+</style>
+
+<canvas></canvas>
+<div class="menu">
+    <a href="index.html" class="item-menu"> BACK MENU </a>
+</div>
+
+<script>
+    const canvas = document.querySelector('canvas');
+    const ctx = canvas.getContext('2d');
+    const particles = [], particlesCount = 200;
+    const mouse = {
+        x: undefined,
+        y: undefined,
+        down: false
+    }
+
+    function getRandomInt(min, max) {
+        return Math.round(Math.random() * (max - min)) + min;
+    }
+
+    function getAngle(x1, y1, x2, y2) {
+        const rad = Math.atan2(x2 - x1, y2 - y1);
+        return (rad * 180) / Math.PI;
+    }
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.px = this.x;
+            this.py = this.y;
+
+            this.speed = 5;
+            this.blur = 1;
+            this.angle = Math.random() * 360
+        }
+
+        draw() {
+            // ctx.save();
+            // ctx.beginPath();
+            // ctx.moveTo(this.px, this.py);
+            // ctx.lineTo(this.x, this.y);
+            // ctx.lineWidth = 1;
+            // ctx.shadowBlur = this.blur;
+            // ctx.shadowColor = "hsla(40, 100%, 50%, 1)";
+            // ctx.strokeStyle = "hsla(40, 100%, 50%, 1)"
+            // ctx.stroke();
+            // ctx.closePath();
+            // ctx.restore();
+
+            ctx.beginPath();
+            ctx.moveTo(this.px, this.py);
+            ctx.lineTo(this.x, this.y);
+            ctx.strokeStyle = "hsla(40, 100%, 50%, 1)"
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        update() {
+            this.draw();
+
+            this.px = this.x;
+            this.py = this.y;
+
+            if (mouse.x != undefined)
+                this.angle = getAngle(this.x, this.y, mouse.x, mouse.y);
+            else
+                this.angle += getRandomInt(-5, 5);
+
+            this.radian = (Math.PI / 180) * this.angle
+
+            this.x += this.speed * Math.sin(this.radian);
+            this.y += this.speed * Math.cos(this.radian);
+
+            if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                this.angle += 90;
+            }
+        }
+    }
+
+    function resizeReset() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = "rgba(0,0,0, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalCompositeOperation = "lighter"
+
+        if (particles.length < particlesCount)
+            particles.push(new Particle())
+
+        particles.forEach(item => item.update());
+    }
+
+    function clickStart(e) {
+        mouse.down = true;
+        mouse.x = e.x;
+        mouse.y = e.y;
+    }
+
+    function mousemove(e) {
+        if (mouse.down) {
+            if (e.changedTouches && e.changedTouches.length > 0) {
+                mouse.x = e.changedTouches[0].pageX;
+                mouse.y = e.changedTouches[0].pageY;
+            }
+            else{
+                mouse.x = e.x;
+                mouse.y = e.y;
+            }
+        }
+    }
+
+    function clickEnd(e) {
+        mouse.down = false;
+        mouse.x = undefined;
+        mouse.y = undefined;
+    }
+
+    function start() {
+        resizeReset();
+        animate();
+    }
+
+    window.addEventListener("resize", resizeReset);
+
+    window.addEventListener("mousedown", clickStart);
+    window.addEventListener("mousemove", mousemove);
+    window.addEventListener("mouseup", clickEnd);
+
+    canvas.addEventListener("touchstart", clickStart, false);
+    canvas.addEventListener("touchmove", mousemove, false);
+    canvas.addEventListener("touchleave", clickEnd, false);
+    canvas.addEventListener("touchend", clickEnd, false);
+
+    start();
+</script>
